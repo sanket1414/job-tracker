@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { JobApplicationInput } from '@/types'
 
 export async function GET(
@@ -7,11 +7,13 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
       return NextResponse.json(
-        { error: 'Supabase configuration is missing. Please check your environment variables.' },
-        { status: 500 }
+        { error: 'Unauthorized. Please sign in.' },
+        { status: 401 }
       )
     }
 
@@ -57,6 +59,16 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Please sign in.' },
+        { status: 401 }
+      )
+    }
+
     const body: JobApplicationInput = await request.json()
 
     const { data, error } = await supabase
@@ -67,13 +79,24 @@ export async function PUT(
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Supabase error:', error)
+      if (error.message.includes('does not exist') || error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Database table not found. Please run the migration SQL in your Supabase dashboard.' },
+          { status: 500 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to update application' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(data)
   } catch (error) {
+    console.error('API error:', error)
     return NextResponse.json(
-      { error: 'Failed to update application' },
+      { error: error instanceof Error ? error.message : 'Failed to update application' },
       { status: 500 }
     )
   }
@@ -84,11 +107,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
       return NextResponse.json(
-        { error: 'Supabase configuration is missing. Please check your environment variables.' },
-        { status: 500 }
+        { error: 'Unauthorized. Please sign in.' },
+        { status: 401 }
       )
     }
 

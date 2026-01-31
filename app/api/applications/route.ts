@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { JobApplicationInput } from '@/types'
 
 export async function GET() {
   try {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
       return NextResponse.json(
-        { error: 'Supabase configuration is missing. Please check your environment variables.' },
-        { status: 500 }
+        { error: 'Unauthorized. Please sign in.' },
+        { status: 401 }
       )
     }
 
@@ -19,7 +21,6 @@ export async function GET() {
 
     if (error) {
       console.error('Supabase error:', error)
-      // Check if table doesn't exist
       if (error.message.includes('does not exist') || error.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Database table not found. Please run the migration SQL in your Supabase dashboard.' },
@@ -44,11 +45,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
       return NextResponse.json(
-        { error: 'Supabase configuration is missing. Please check your environment variables.' },
-        { status: 500 }
+        { error: 'Unauthorized. Please sign in.' },
+        { status: 401 }
       )
     }
 
@@ -56,13 +59,12 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('job_applications')
-      .insert([body])
+      .insert([{ ...body, user_id: user.id }])
       .select()
       .single()
 
     if (error) {
       console.error('Supabase error:', error)
-      // Check if table doesn't exist
       if (error.message.includes('does not exist') || error.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Database table not found. Please run the migration SQL in your Supabase dashboard.' },

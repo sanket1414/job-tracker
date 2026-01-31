@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { JobApplication, JobApplicationInput } from '@/types'
 import StatsGrid from './StatsGrid'
 import AddApplicationButton from './AddApplicationButton'
@@ -8,6 +9,7 @@ import JobList from './JobList'
 import ApplicationModal from './ApplicationModal'
 
 export default function DashboardContent() {
+  const router = useRouter()
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -22,6 +24,11 @@ export default function DashboardContent() {
   const fetchApplications = async () => {
     try {
       const response = await fetch('/api/applications')
+      if (response.status === 401) {
+        router.push('/login')
+        router.refresh()
+        return
+      }
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to fetch applications')
@@ -59,6 +66,11 @@ export default function DashboardContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
+        if (response.status === 401) {
+          router.push('/login')
+          router.refresh()
+          return
+        }
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to update application')
@@ -75,6 +87,11 @@ export default function DashboardContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
+        if (response.status === 401) {
+          router.push('/login')
+          router.refresh()
+          return
+        }
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to create application')
@@ -103,6 +120,11 @@ export default function DashboardContent() {
       const response = await fetch(`/api/applications/${id}`, {
         method: 'DELETE',
       })
+      if (response.status === 401) {
+        router.push('/login')
+        router.refresh()
+        return
+      }
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to delete application')

@@ -4,6 +4,8 @@ A responsive full-stack job application tracker web app built with Next.js, Type
 
 ## Features
 
+- **User authentication** - Sign up and sign in with email/password
+- **User-specific data** - Each user only sees their own job applications
 - Track job applications with detailed information
 - View summary statistics (Total, Applied, Interviewing, Offers)
 - Add, edit, and delete job applications
@@ -25,10 +27,12 @@ npm install
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
+   - In Supabase Dashboard: Authentication > URL Configuration, add your site URL and redirect URLs (e.g. `http://localhost:3000` and `http://localhost:3000/auth/callback` for local development)
 
-3. Run the database migration:
+3. Run the database migrations:
    - In your Supabase dashboard, go to SQL Editor
-   - Copy and run the SQL from `supabase/migrations/001_create_job_applications.sql`
+   - Run `supabase/migrations/001_create_job_applications.sql` first
+   - Then run `supabase/migrations/002_add_user_id_and_rls.sql`
 
 4. Run the development server:
 ```bash
