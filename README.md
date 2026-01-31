@@ -1,6 +1,20 @@
-# Job Application Tracker
+# Job Application Tracker (JP)
 
-A responsive full-stack job application tracker web app built with Next.js, TypeScript, Tailwind CSS, and Supabase for tracking job applications in the Japan/Tokyo market.
+A responsive **full-stack job application tracker** web app built with **Next.js**, **TypeScript**, **Tailwind CSS**, and **Supabase** to track job applications in the **Japan/Tokyo** market.
+
+🚀 **Live Demo:** https://job-tracker-atarashi.netlify.app/
+
+---
+
+## Built with Vibe Coding (AI-Assisted Development)
+This project was built using a **vibe coding workflow** — rapid, AI-assisted iteration to ship a clean MVP quickly:
+- Fast UI scaffolding and feature iteration
+- Frequent small improvements and refactors
+- Focus on shipping a working product first, then polishing UX and structure
+
+> Note: Even with vibe coding, the database design, Row Level Security (RLS), and auth flow were implemented intentionally to keep the app production-safe.
+
+---
 
 ## Features
 
